@@ -48,6 +48,7 @@ void handleSendCmd()
     if (server.arg("cmd").length() > 0)
     {
       Serial.write((server.arg("cmd") + '\r').c_str());
+      server.send(200, "text/plain", "OK");
     }
   }
 }

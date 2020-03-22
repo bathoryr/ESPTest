@@ -9,8 +9,8 @@ const char console_page[] PROGMEM = R"=====(
     <div>
         Console:<br/>
         <pre><div id="console"/></pre>
-        ADC Value is : <span id="ADCValue">0</span><br>
-        LED State is : <span id="LEDState">NA</span>
+        Console Value is : <span id="conStat">0</span><br>
+        Command State is : <span id="cmdStat">NA</span>
     </div>
     <input type="text" id="cmd">
 	<button type="button" onclick="sendData()">Send command</button>
@@ -23,6 +23,7 @@ function sendData() {
     if (this.readyState == 4 && this.status == 200) {
       document.getElementById("console").innerText = document.getElementById("console").innerText +
         this.responseText;
+      document.getElementById("cmdStat").innerHTML = this.responseURL;
     }
   };  
   xhttp.open("GET", "/sendCmd?cmd=" + document.getElementById("cmd").value, true);
@@ -35,6 +36,7 @@ function getData() {
     if (this.readyState == 4 && this.status == 200) {
       document.getElementById("console").innerText =
       this.responseText;
+      document.getElementById("conStat").innerHTML = this.responseURL;
     }
   };
   xhttp.open("GET", "/consoleText", true);
