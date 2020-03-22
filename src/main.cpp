@@ -4,7 +4,7 @@
 #include <WiFiUdp.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
-//#include "pages.h"
+#include "consolePage.h"
 
 #ifndef STASSID
   #error "No WiFi password defined! Set STASSID and STAPSK env. variables"
@@ -24,9 +24,32 @@ void handleRoot() {
   String msg = "<h1>ESP8266 web server</h1>\n\n";
   msg += "IP address: " + WiFi.localIP().toString() + "<br/>";
   msg += "<p><a href=\"/console\">RPi console output</a></p>";
+  msg += "<p><a href=\"/console2\">RPi console output 2</a></p>";
   msg += "<p><a href=\"/log\">ESP status log</a></p>";
   server.send(200, "text/html", msg);
   digitalWrite(LED_BUILTIN, 0);
+}
+
+void handleConsole2()
+{
+  server.send(200, "text/html", console_page);
+}
+
+void handleConsText()
+{
+  server.send(200, "text/plain", consoleBuf);
+}
+
+void handleSendCmd()
+{
+  if (server.method() == HTTP_GET)
+  {
+    // Send data entered into command line
+    if (server.arg("cmd").length() > 0)
+    {
+      Serial.write((server.arg("cmd") + '\r').c_str());
+    }
+  }
 }
 
 void handleConsole()
@@ -156,6 +179,9 @@ void setup()
   server.on("/console", handleConsole);
   server.on("/log", handleLog);
   server.onNotFound(handleNotFound);
+  server.on("/console2", handleConsole2);
+  server.on("/consoleText", handleConsText);
+  server.on("/sendCmd", handleSendCmd);
   // MDNS.begin("esp8266-a4ca23");
   server.begin();
   pinMode(LED_BUILTIN, OUTPUT);
