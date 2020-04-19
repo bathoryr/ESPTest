@@ -4,26 +4,38 @@ const char console_page[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
 <body>
-
-<div id="demo">
+<div>
     <div>
         Console:<br/>
         <pre><div id="console"/></pre>
-        Console Value is : <span id="conStat">0</span><br>
-        Command State is : <span id="cmdStat">NA</span>
     </div>
     <input type="text" id="cmd">
-	<button type="button" onclick="sendData()">Send command</button>
+	<button type="button" onclick="sendData()">Send command</button> 
+  <button type="button" onclick="clrScr()">Clear screen</button>
+  <div>
+    <button type="button" onclick="doReset()">RESET</button>
+  </div>
 </div>
 
 <script>
+function doReset() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("GET", "/sendCmd?cmd=RESET", true);
+  xhttp.send();
+}
+
+function clrScr() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("GET", "/sendCmd?cmd=CLRSCR", true);
+  xhttp.send();
+}
+
 function sendData() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       document.getElementById("console").innerText = document.getElementById("console").innerText +
         this.responseText;
-      document.getElementById("cmdStat").innerHTML = this.responseURL;
     }
   };  
   xhttp.open("GET", "/sendCmd?cmd=" + document.getElementById("cmd").value, true);
@@ -34,9 +46,7 @@ function getData() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      document.getElementById("console").innerText =
-      this.responseText;
-      document.getElementById("conStat").innerHTML = this.responseURL;
+      document.getElementById("console").innerText = this.responseText;
     }
   };
   xhttp.open("GET", "/consoleText", true);
@@ -44,15 +54,8 @@ function getData() {
 }
 
 setInterval(function() {
-  // Call a function repetatively with 2 Second interval
   getData();
-}, 2000); //2000mSeconds update rate
-
-/*
-document.addEventListener('DOMContentLoaded', function() {
-    getData();
-}, false);
-*/
+}, 2000);
 </script>
 </body>
 </html>
