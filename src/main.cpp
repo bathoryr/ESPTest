@@ -11,9 +11,19 @@
 
 const char *ssid = STASSID;
 const char *password = STAPSK;
+const uint8_t HEARTBEAT_PIN = D2;
 
 OTAhandlers OTA;
 pageHandlers Web;
+
+unsigned long last_heartbeat_change = 0ul;
+volatile bool heartbeat_changed;
+bool dim_led;
+
+ICACHE_RAM_ATTR void gpio_change_handler()
+{
+    heartbeat_changed = true;
+}
 
 void setup()
 {
@@ -36,25 +46,30 @@ void setup()
     // MDNS.begin("esp8266-a4ca23");
 
     pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(HEARTBEAT_PIN, INPUT);
+    attachInterrupt(HEARTBEAT_PIN, gpio_change_handler, RISING);
 }
 
 void loop()
 {
+    if (heartbeat_changed == true)
+    {
+        heartbeat_changed = false;
+        last_heartbeat_change = millis();
+        digitalWrite(LED_BUILTIN, LOW);
+        dim_led = true;
+    }
+    if (dim_led == true && millis() - last_heartbeat_change > 20)
+    {
+        digitalWrite(LED_BUILTIN, HIGH);
+        dim_led = false;
+    }
+
     OTA.handle();
     Web.handle();
     // MDNS.update();
     while (Serial.available() > 0)
     {
         Web.ReadChar(Serial.read());
-    }
-
-    auto tenths = millis() / 100 % 10;
-    if (tenths == 0)
-    {
-        digitalWrite(LED_BUILTIN, LOW);
-    }
-    else if (tenths == 1)
-    {
-        digitalWrite(LED_BUILTIN, HIGH);
     }
 }
