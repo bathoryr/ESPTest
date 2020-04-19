@@ -4,8 +4,7 @@
 pageHandlers::pageHandlers()
 {
     server.begin(80);
-    consoleLine.reserve(80);
-    lineCounter = 0;
+    consoleBuff.reserve(80 * 100);
     pOTA = nullptr;
 }
 
@@ -16,18 +15,15 @@ void pageHandlers::handle()
 
 void pageHandlers::ReadChar(const char c)
 {
-    consoleLine += c;
+    consoleBuff += c;
     if (c == '\n')
     {
-        lineCounter++;
-        while (lineCounter >= CONSOLE_MAX_LINES)
+        unsigned int lineCount = std::count(consoleBuff.begin(), consoleBuff.end(), '\n');
+        while (lineCount >= CONSOLE_MAX_LINES)
         {
             consoleBuff.erase(0, consoleBuff.find_first_of('\n') + 1);
-            lineCounter--;
+            lineCount = std::count(consoleBuff.begin(), consoleBuff.end(), '\n');
         }
-
-        consoleBuff += consoleLine;
-        consoleLine.clear();
     }
 }
 
@@ -82,7 +78,6 @@ void pageHandlers::handleSendCmd(pageHandlers& instance)
             }
             else if (instance.server.arg("cmd") == "CLRSCR")
             {
-                instance.lineCounter = 0;
                 instance.consoleBuff.clear();
             }
             else

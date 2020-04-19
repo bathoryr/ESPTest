@@ -25,9 +25,7 @@ class pageHandlers
   private:
     OTAhandlers* pOTA;
     ESP8266WebServer server;
-    std::string consoleLine;
     std::string consoleBuff;
-    unsigned int lineCounter;
     static const unsigned int CONSOLE_MAX_LINES = 80;
     static const uint8_t RESET_PIN = D1;
 };
