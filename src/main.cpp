@@ -27,17 +27,15 @@ void setup()
         delay(5000);
         ESP.restart();
     }
-
-    OTAhandlers::SetupOTA(OTA);
     OTA.WriteStatus("Ready\nIP address: ");
     OTA.WriteStatus(WiFi.localIP().toString());
 
+    OTAhandlers::SetupOTA(OTA);
     pageHandlers::SetupWeb(Web, &OTA);
 
     // MDNS.begin("esp8266-a4ca23");
 
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(D1, INPUT);
 }
 
 void loop()

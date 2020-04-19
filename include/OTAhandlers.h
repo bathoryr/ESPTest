@@ -21,6 +21,6 @@ class OTAhandlers
 
   private:
     ArduinoOTAClass OTA;
-    const unsigned int STATUS_BUF_LEN = 2048;
+    static const unsigned int STATUS_BUF_LEN = 2048;
     String statusLog;
 };

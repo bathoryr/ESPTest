@@ -14,6 +14,7 @@ class pageHandlers
     const char* GetConsoleText();
 
   protected:
+    void ResetRPi();
     static void handleRoot(pageHandlers& instance);
     static void handleConsole(pageHandlers& instance);
     static void handleConsText(pageHandlers& instance);
@@ -27,5 +28,6 @@ class pageHandlers
     std::string consoleLine;
     std::string consoleBuff;
     unsigned int lineCounter;
-    const unsigned int CONSOLE_MAX_LINES = 80;
+    static const unsigned int CONSOLE_MAX_LINES = 80;
+    static const uint8_t RESET_PIN = D1;
 };

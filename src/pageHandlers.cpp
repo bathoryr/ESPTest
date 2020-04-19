@@ -38,18 +38,26 @@ const char* pageHandlers::GetConsoleText()
 
 void pageHandlers::SetupWeb(pageHandlers& instance, OTAhandlers* OTAinstance)
 {
+    pinMode(RESET_PIN, INPUT);
+
     instance.pOTA = OTAinstance;
 
     instance.server.on("/", [&instance](){handleRoot(instance);});
-    instance.server.on("/inline", [&instance]() {
-        instance.server.send(200, "text/plain", "this works as well");
-    });
     instance.server.on("/log", [&instance](){handleLog(instance);});
-    instance.server.onNotFound([&instance](){handleNotFound(instance);});
     instance.server.on("/console", [&instance](){handleConsole(instance);});
     instance.server.on("/consoleText", [&instance](){handleConsText(instance);});
     instance.server.on("/sendCmd", [&instance](){handleSendCmd(instance);});
+    instance.server.onNotFound([&instance](){handleNotFound(instance);});
+
     instance.server.begin();
+}
+
+void pageHandlers::ResetRPi()
+{
+    digitalWrite(RESET_PIN, LOW);
+    pinMode(RESET_PIN, OUTPUT);
+    delay(20);
+    pinMode(RESET_PIN, INPUT);
 }
 
 void pageHandlers::handleRoot(pageHandlers& instance)
@@ -70,13 +78,11 @@ void pageHandlers::handleSendCmd(pageHandlers& instance)
         {
             if (instance.server.arg("cmd") == "RESET")
             {
-                digitalWrite(D1, LOW);
-                pinMode(D1, OUTPUT);
-                delay(20);
-                pinMode(D1, INPUT);
+                instance.ResetRPi();
             }
             else if (instance.server.arg("cmd") == "CLRSCR")
             {
+                instance.lineCounter = 0;
                 instance.consoleBuff.clear();
             }
             else
