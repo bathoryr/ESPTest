@@ -4,6 +4,8 @@
 #include <WiFiUdp.h>
 #include "OTAhandlers.h"
 #include "pageHandlers.h"
+#include "mqttClient.h"
+#include "statusLog.h"
 
 #ifndef STASSID
 #error "No WiFi password defined! Set STASSID and STAPSK env. variables"
@@ -15,6 +17,7 @@ const uint8_t HEARTBEAT_PIN = D2;
 
 OTAhandlers OTA;
 pageHandlers Web;
+mqttClient MQTT;
 
 unsigned long last_heartbeat_change = 0ul;
 volatile bool heartbeat_changed;
@@ -33,6 +36,7 @@ void setup()
     WiFi.begin(ssid, password);
     while (WiFi.waitForConnectResult() != WL_CONNECTED)
     {
+        statusLog::instance().writeLog("Connection Failed! Rebooting...");
         OTA.WriteStatus("Connection Failed! Rebooting...\n");
         delay(5000);
         ESP.restart();
@@ -42,6 +46,7 @@ void setup()
 
     OTAhandlers::SetupOTA(OTA);
     pageHandlers::SetupWeb(Web, &OTA);
+    mqttClient::setup(MQTT, "lede0.lan");
 
     // MDNS.begin("esp8266-a4ca23");
 
