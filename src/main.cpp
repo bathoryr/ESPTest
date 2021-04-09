@@ -31,22 +31,21 @@ ICACHE_RAM_ATTR void gpio_change_handler()
 void setup()
 {
     Serial.begin(115200);
-    OTA.WriteStatus("Booting\n");
+    statusLog::writeLine("Booting...");
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.waitForConnectResult() != WL_CONNECTED)
     {
-        statusLog::instance().writeLog("Connection Failed! Rebooting...");
-        OTA.WriteStatus("Connection Failed! Rebooting...\n");
+        statusLog::writeLine("Connection Failed! Rebooting...");
         delay(5000);
         ESP.restart();
     }
-    OTA.WriteStatus("Ready\nIP address: ");
-    OTA.WriteStatus(WiFi.localIP().toString());
+    statusLog::writeLine("Ready\nIP address: ");
+    statusLog::writeLine(WiFi.localIP().toString().c_str());
 
     OTAhandlers::SetupOTA(OTA);
-    pageHandlers::SetupWeb(Web, &OTA);
-    mqttClient::setup(MQTT, "lede0.lan");
+    pageHandlers::SetupWeb(Web);
+    mqttClient::setup(MQTT, "lede0");
 
     // MDNS.begin("esp8266-a4ca23");
 
@@ -54,6 +53,8 @@ void setup()
     pinMode(HEARTBEAT_PIN, INPUT);
     attachInterrupt(HEARTBEAT_PIN, gpio_change_handler, RISING);
 }
+
+unsigned long timeout10s = millis();
 
 void loop()
 {
@@ -63,6 +64,7 @@ void loop()
         last_heartbeat_change = millis();
         digitalWrite(LED_BUILTIN, LOW);
         dim_led = true;
+        MQTT.publish("rpiguard/heartbeat", String(millis()).c_str());
     }
     if (dim_led == true && millis() - last_heartbeat_change > 20)
     {
@@ -70,8 +72,25 @@ void loop()
         dim_led = false;
     }
 
+    if (millis() - timeout10s > 10000)
+    {
+        timeout10s = millis();
+        auto alive = millis() - last_heartbeat_change;
+        if (alive < 15000)
+            MQTT.publish("rpiguard/status", "green");
+        else
+        if (alive >= 30000 && alive < 60000)
+            MQTT.publish("rpiguard/status", "yellow");
+        else
+        if (alive >= 60000 && alive < 120000)
+            MQTT.publish("rpiguard/status", "orange");
+        else
+            MQTT.publish("rpiguard/status", "red");
+    }
+
     OTA.handle();
     Web.handle();
+    MQTT.handle();
     // MDNS.update();
     while (Serial.available() > 0)
     {

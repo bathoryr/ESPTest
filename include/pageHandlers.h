@@ -8,7 +8,7 @@ class pageHandlers
 {
   public:
     pageHandlers();
-    static void SetupWeb(pageHandlers& instance, OTAhandlers* OTAinstance);
+    static void SetupWeb(pageHandlers& instance);
     void handle();
     void ReadChar(const char c);
     const char* GetConsoleText();
@@ -20,10 +20,10 @@ class pageHandlers
     static void handleConsText(pageHandlers& instance);
     static void handleSendCmd(pageHandlers& instance);
     static void handleLog(pageHandlers& instance);
+    static void handleLogText(pageHandlers& instance);
     static void handleNotFound(pageHandlers& instance);
 
   private:
-    OTAhandlers* pOTA;
     ESP8266WebServer server;
     std::string consoleBuff;
     static const unsigned int CONSOLE_MAX_LINES = 80;

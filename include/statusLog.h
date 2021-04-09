@@ -3,20 +3,12 @@
 
 class statusLog
 {
-  private:
-    statusLog();
-
   public:
-    void writeLog(const char* msg);
-    const char* getStatus();
-
-    static statusLog& instance()
-    {
-        static statusLog INST;
-        return INST;
-    }
+    static void writeMsg(const char* msg);
+    static void writeLine(const char* msg);
+    static const char* getStatus();
 
   private:
-    std::string log;
+    static std::string logmsg;
     static const unsigned int STATUS_MAX_LINES = 50;
 };

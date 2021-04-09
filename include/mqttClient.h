@@ -8,6 +8,7 @@ class mqttClient
     mqttClient();
     static void setup(mqttClient& instance, const char* server, uint16_t port = 1883);
     void handle();
+    bool publish(const char* topic, const char* payload, bool retain = false);
 
   private:
     void connect();
@@ -16,5 +17,5 @@ class mqttClient
     unsigned long last_attempt;
   
   protected:
-    static void topic_callback(mqttClient& instance, char* topic, byte* payload, unsigned int length);
+    static void topic_callback(mqttClient& instance, char* ptopic, byte* payload, unsigned int length);
 };

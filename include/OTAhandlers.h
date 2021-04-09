@@ -9,9 +9,6 @@ class OTAhandlers
     OTAhandlers();
     static void SetupOTA(OTAhandlers& instance);
     void handle();
-    String& GetStatus();
-    void WriteStatus(String msg);
-    void WriteStatus(const char* msg);
   
   protected:
     static void onStart(OTAhandlers& instance);
@@ -21,6 +18,4 @@ class OTAhandlers
 
   private:
     ArduinoOTAClass OTA;
-    static const unsigned int STATUS_BUF_LEN = 2048;
-    String statusLog;
 };

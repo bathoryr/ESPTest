@@ -1,27 +1,30 @@
 #include <algorithm>
 #include "statusLog.h"
 
-statusLog::statusLog()
+std::string statusLog::logmsg;
+
+void statusLog::writeMsg(const char* msg)
 {
+    logmsg += msg;
 }
-    
-void statusLog::writeLog(const char* msg)
+
+void statusLog::writeLine(const char* msg)
 {
-    unsigned int lineCount = std::count(log.begin(), log.end(), '\n');
+    unsigned int lineCount = std::count(logmsg.begin(), logmsg.end(), '\n');
     while (lineCount >= STATUS_MAX_LINES)
     {
-        log.erase(0, log.find_first_of('\n') + 1);
-        lineCount = std::count(log.begin(), log.end(), '\n');
+        logmsg.erase(0, logmsg.find_first_of('\n') + 1);
+        lineCount = std::count(logmsg.begin(), logmsg.end(), '\n');
     }
 
-    log += msg;
-    if (log.back() != '\n')
+    logmsg += msg;
+    if (logmsg.back() != '\n')
     {
-        log.append("\n");
+        logmsg.append("\n");
     }
 }
 
 const char* statusLog::getStatus()
 {
-    return log.c_str();
+    return logmsg.c_str();
 }

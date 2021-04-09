@@ -1,11 +1,12 @@
 #include "pageHandlers.h"
 #include "consolePage.h"
+#include "statusLog.h"
+#include "logPage.h"
 
 pageHandlers::pageHandlers()
 {
     server.begin(80);
     consoleBuff.reserve(80 * 100);
-    pOTA = nullptr;
 }
 
 void pageHandlers::handle()
@@ -32,14 +33,13 @@ const char* pageHandlers::GetConsoleText()
     return consoleBuff.c_str();
 }
 
-void pageHandlers::SetupWeb(pageHandlers& instance, OTAhandlers* OTAinstance)
+void pageHandlers::SetupWeb(pageHandlers& instance)
 {
     pinMode(RESET_PIN, INPUT);
 
-    instance.pOTA = OTAinstance;
-
     instance.server.on("/", [&instance](){handleRoot(instance);});
     instance.server.on("/log", [&instance](){handleLog(instance);});
+    instance.server.on("/logText", [&instance](){handleLogText(instance);});
     instance.server.on("/console", [&instance](){handleConsole(instance);});
     instance.server.on("/consoleText", [&instance](){handleConsText(instance);});
     instance.server.on("/sendCmd", [&instance](){handleSendCmd(instance);});
@@ -87,6 +87,10 @@ void pageHandlers::handleSendCmd(pageHandlers& instance)
 
             instance.server.send(200, "text/plain", "OK");
         }
+        else
+        {
+            Serial.write("\r\n");
+        }
     }
 }
 
@@ -102,7 +106,12 @@ void pageHandlers::handleConsText(pageHandlers& instance)
 
 void pageHandlers::handleLog(pageHandlers& instance)
 {
-    instance.server.send(200, "text/plain", instance.pOTA != nullptr ? instance.pOTA->GetStatus() : "--");
+    instance.server.send(200, "text/html", log_page);
+}
+
+void pageHandlers::handleLogText(pageHandlers& instance)
+{
+    instance.server.send(200, "text/plain", statusLog::getStatus());
 }
 
 void pageHandlers::handleNotFound(pageHandlers& instance)

@@ -1,28 +1,8 @@
 #include <OTAhandlers.h>
+#include "statusLog.h"
 
 OTAhandlers::OTAhandlers()
 {
-    statusLog.reserve(STATUS_BUF_LEN);
-}
-
-void OTAhandlers::WriteStatus(String msg)
-{
-    if (statusLog.length() + msg.length() > STATUS_BUF_LEN)
-    {
-        auto r = statusLog.length() + msg.length() - STATUS_BUF_LEN;
-        statusLog.remove(0, r);
-    }
-    statusLog += msg;
-}
-
-void OTAhandlers::WriteStatus(const char* msg)
-{
-    WriteStatus(String(msg));
-}
-
-String& OTAhandlers::GetStatus()
-{
-    return statusLog;
 }
 
 void OTAhandlers::SetupOTA(OTAhandlers& instance)
@@ -65,43 +45,43 @@ void OTAhandlers::onStart(OTAhandlers& instance)
     }
 
     // NOTE: if updating FS this would be the place to unmount FS using FS.end()
-    instance.statusLog += "Start updating " + type;
+    statusLog::writeLine(("Start updating " + type).c_str());
 }
 
 void OTAhandlers::onProgress(OTAhandlers& instance, unsigned int progress, unsigned int total) 
 {
     char szbuf[128];
     snprintf(szbuf, 127, "Progress: %u%%\r", (progress / (total / 100)));
-    instance.statusLog += szbuf;
+    statusLog::writeLine(szbuf);
 }
 void OTAhandlers::onEnd(OTAhandlers& instance) 
 {
-    instance.statusLog += "\nEnd";
+    statusLog::writeLine("End");
 }
 
 void OTAhandlers::onError(OTAhandlers& instance, ota_error_t error) 
 {
     char szbuf[128];
     snprintf(szbuf, 127, "Error[%u]: ", error);
-    instance.statusLog += szbuf;
+    statusLog::writeMsg(szbuf);
     if (error == OTA_AUTH_ERROR)
     {
-      instance.statusLog += "Auth Failed\n";
+      statusLog::writeLine("Auth Failed");
     }
     else if (error == OTA_BEGIN_ERROR)
     {
-      instance.statusLog += "Begin Failed\n";
+      statusLog::writeLine("Begin Failed");
     }
     else if (error == OTA_CONNECT_ERROR)
     {
-      instance.statusLog += "Connect Failed\n";
+      statusLog::writeLine("Connect Failed");
     }
     else if (error == OTA_RECEIVE_ERROR)
     {
-      instance.statusLog += "Receive Failed\n";
+      statusLog::writeLine("Receive Failed");
     }
     else if (error == OTA_END_ERROR)
     {
-      instance.statusLog += "End Failed\n";
+      statusLog::writeLine("End Failed");
     }
 }
